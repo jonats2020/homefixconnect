@@ -17,6 +17,10 @@ import ProfileScreen from './src/screens/profile/ProfileScreen';
 import JobDetailScreen from './src/screens/jobs/JobDetailScreen';
 import CreateJobScreen from './src/screens/jobs/CreateJobScreen';
 
+// Bid Screens
+import MyBidsScreen from './src/screens/bids/MyBidsScreen';
+import EditBidScreen from './src/screens/bids/EditBidScreen';
+
 // Chat Screens
 import ChatListScreen from './src/screens/chat/ChatListScreen';
 import ChatScreen from './src/screens/chat/ChatScreen';
@@ -75,6 +79,18 @@ export default function App() {
               name="CreateJob" 
               component={CreateJobScreen} 
               options={{ title: 'Post a New Job' }}
+            />
+            
+            {/* Bid Routes */}
+            <Stack.Screen 
+              name="MyBids" 
+              component={MyBidsScreen} 
+              options={{ title: 'My Bids' }}
+            />
+            <Stack.Screen 
+              name="EditBid" 
+              component={EditBidScreen} 
+              options={{ title: 'Edit Bid' }}
             />
             
             {/* Chat Routes */}

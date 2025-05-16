@@ -1,15 +1,12 @@
 const { createClient } = require('@supabase/supabase-js');
-const dotenv = require('dotenv');
-
-dotenv.config();
 
 // Initialize Supabase client
-const supabaseUrl = process.env.SUPABASE_URL || '';
-const supabaseKey = process.env.SUPABASE_SERVICE_KEY || '';
+const supabaseUrl = process.env.SUPABASE_URL;
+const supabaseKey = process.env.SUPABASE_KEY;
 
 if (!supabaseUrl || !supabaseKey) {
-  console.error('Missing Supabase credentials. Please check your environment variables.');
-  process.exit(1);
+  console.error('ERROR: Missing Supabase credentials in environment variables');
+  console.error('Make sure SUPABASE_URL and SUPABASE_KEY are set in .env file');
 }
 
 const supabase = createClient(supabaseUrl, supabaseKey);
