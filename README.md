@@ -2,6 +2,9 @@
 
 A sophisticated mobile marketplace platform built on Replit that connects homeowners with skilled contractors for various home services including plumbing, electrical work, gardening, carpentry, and more.
 
+![Group 1](https://github.com/user-attachments/assets/5e1c2235-d1b8-4920-9c61-39f87e2ca458)
+
+
 ## ✨ Built to Showcase Replit's Capabilities
 
 This project demonstrates how Replit's powerful development environment enables the creation of full-stack applications with complex architectures:
