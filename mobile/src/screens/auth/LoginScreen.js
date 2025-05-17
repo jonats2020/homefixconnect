@@ -20,6 +20,7 @@ const LoginScreen = ({ navigation }) => {
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const { login } = useAuth();
+  
 
   const handleLogin = async () => {
     if (!email || !password) {
@@ -28,11 +29,17 @@ const LoginScreen = ({ navigation }) => {
     }
 
     setIsLoading(true);
-    
+
     try {
       const result = await login(email, password);
-      
-      if (!result.success) {
+
+      if (result.success) {
+        // Navigate to Home screen on successful login
+        navigation.reset({
+          index: 0,
+          routes: [{ name: 'Home' }],
+        });
+      } else {
         Alert.alert('Login Failed', result.message);
       }
     } catch (error) {

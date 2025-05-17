@@ -1,18 +1,22 @@
 import React, { useState } from 'react';
-import { 
-  StyleSheet, 
-  View, 
-  Text, 
-  TextInput, 
-  TouchableOpacity, 
+import {
+  StyleSheet,
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
   ActivityIndicator,
   Alert,
+  Image,
   KeyboardAvoidingView,
   Platform,
-  ScrollView
+  ScrollView,
+  Dimensions,
 } from 'react-native';
 import { useAuth } from '../../context/AuthContext';
 import { USER_ROLES } from '../../utils/config';
+
+const { width } = Dimensions.get('window');
 
 const RegisterScreen = ({ navigation }) => {
   const [email, setEmail] = useState('');
@@ -23,7 +27,7 @@ const RegisterScreen = ({ navigation }) => {
   const [address, setAddress] = useState('');
   const [role, setRole] = useState(USER_ROLES.CUSTOMER);
   const [isLoading, setIsLoading] = useState(false);
-  
+
   const { register } = useAuth();
 
   const validateInputs = () => {
@@ -31,36 +35,60 @@ const RegisterScreen = ({ navigation }) => {
       Alert.alert('Error', 'Please fill in all required fields');
       return false;
     }
-    
+
     if (password !== confirmPassword) {
       Alert.alert('Error', 'Passwords do not match');
       return false;
     }
-    
+
     if (password.length < 8) {
       Alert.alert('Error', 'Password must be at least 8 characters long');
       return false;
     }
-    
+
     // Simple email validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
       Alert.alert('Error', 'Please enter a valid email address');
       return false;
     }
-    
+
     return true;
   };
 
   const handleRegister = async () => {
     if (!validateInputs()) return;
-    
+
     setIsLoading(true);
-    
+
     try {
-      const result = await register(email, password, fullName, role, phone, address);
-      
-      if (!result.success) {
+      const result = await register(
+        email,
+        password,
+        fullName,
+        role,
+        phone,
+        address
+      );
+
+      if (result.success) {
+        // Navigate to Home screen on successful registration
+        Alert.alert(
+          'Registration Successful',
+          'Your account has been created successfully!',
+          [
+            {
+              text: 'OK',
+              onPress: () => {
+                navigation.reset({
+                  index: 0,
+                  routes: [{ name: 'Home' }],
+                });
+              },
+            },
+          ]
+        );
+      } else {
         Alert.alert('Registration Failed', result.message);
       }
     } catch (error) {
@@ -71,115 +99,121 @@ const RegisterScreen = ({ navigation }) => {
     }
   };
 
-  const toggleRole = () => {
-    setRole(role === USER_ROLES.CUSTOMER ? USER_ROLES.CONTRACTOR : USER_ROLES.CUSTOMER);
-  };
-
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : null}
       style={styles.container}
     >
       <ScrollView contentContainerStyle={styles.scrollContainer}>
-        <Text style={styles.title}>Create Account</Text>
-        
+        <View style={styles.header}>
+          <Text style={styles.title}>Create Account</Text>
+        </View>
+
         <View style={styles.roleToggleContainer}>
           <Text style={styles.roleLabel}>I am a:</Text>
           <View style={styles.roleButtons}>
-            <TouchableOpacity 
+            <TouchableOpacity
               style={[
-                styles.roleButton, 
-                role === USER_ROLES.CUSTOMER && styles.roleButtonActive
+                styles.roleButton,
+                role === USER_ROLES.CUSTOMER && styles.roleButtonActive,
               ]}
               onPress={() => setRole(USER_ROLES.CUSTOMER)}
             >
-              <Text style={[
-                styles.roleButtonText,
-                role === USER_ROLES.CUSTOMER && styles.roleButtonTextActive
-              ]}>Customer</Text>
+              <Text
+                style={[
+                  styles.roleButtonText,
+                  role === USER_ROLES.CUSTOMER && styles.roleButtonTextActive,
+                ]}
+              >
+                Customer
+              </Text>
             </TouchableOpacity>
-            
-            <TouchableOpacity 
+
+            <TouchableOpacity
               style={[
-                styles.roleButton, 
-                role === USER_ROLES.CONTRACTOR && styles.roleButtonActive
+                styles.roleButton,
+                role === USER_ROLES.CONTRACTOR && styles.roleButtonActive,
               ]}
               onPress={() => setRole(USER_ROLES.CONTRACTOR)}
             >
-              <Text style={[
-                styles.roleButtonText,
-                role === USER_ROLES.CONTRACTOR && styles.roleButtonTextActive
-              ]}>Contractor</Text>
+              <Text
+                style={[
+                  styles.roleButtonText,
+                  role === USER_ROLES.CONTRACTOR && styles.roleButtonTextActive,
+                ]}
+              >
+                Contractor
+              </Text>
             </TouchableOpacity>
           </View>
         </View>
-        
+
         <Text style={styles.label}>Full Name *</Text>
         <TextInput
           style={styles.input}
-          placeholder="Enter your full name"
+          placeholder='Enter your full name'
           value={fullName}
           onChangeText={setFullName}
         />
-        
+
         <Text style={styles.label}>Email *</Text>
         <TextInput
           style={styles.input}
-          placeholder="Enter your email"
+          placeholder='Enter your email'
           value={email}
           onChangeText={setEmail}
-          autoCapitalize="none"
-          keyboardType="email-address"
+          autoCapitalize='none'
+          keyboardType='email-address'
         />
-        
+
         <Text style={styles.label}>Password *</Text>
         <TextInput
           style={styles.input}
-          placeholder="Create a password"
+          placeholder='Create a password'
           value={password}
           onChangeText={setPassword}
           secureTextEntry
         />
-        
+
         <Text style={styles.label}>Confirm Password *</Text>
         <TextInput
           style={styles.input}
-          placeholder="Confirm your password"
+          placeholder='Confirm your password'
           value={confirmPassword}
           onChangeText={setConfirmPassword}
           secureTextEntry
         />
-        
+
         <Text style={styles.label}>Phone Number</Text>
         <TextInput
           style={styles.input}
-          placeholder="Enter your phone number"
+          placeholder='Enter your phone number'
           value={phone}
           onChangeText={setPhone}
-          keyboardType="phone-pad"
+          keyboardType='phone-pad'
         />
-        
+
         <Text style={styles.label}>Address</Text>
         <TextInput
           style={styles.input}
-          placeholder="Enter your address"
+          placeholder='Enter your address'
           value={address}
           onChangeText={setAddress}
           multiline
         />
-        
-        <TouchableOpacity 
+
+        <TouchableOpacity
           style={styles.button}
           onPress={handleRegister}
           disabled={isLoading}
         >
           {isLoading ? (
-            <ActivityIndicator color="#fff" />
+            <ActivityIndicator color='#fff' />
           ) : (
             <Text style={styles.buttonText}>Create Account</Text>
           )}
         </TouchableOpacity>
-        
+
         <View style={styles.footer}>
           <Text style={styles.footerText}>Already have an account?</Text>
           <TouchableOpacity onPress={() => navigation.navigate('Login')}>
@@ -198,6 +232,16 @@ const styles = StyleSheet.create({
   },
   scrollContainer: {
     padding: 20,
+  },
+  header: {
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  headerImage: {
+    width: width - 40,
+    height: 200,
+    borderRadius: 12,
+    marginBottom: 20,
   },
   title: {
     fontSize: 24,
@@ -281,7 +325,7 @@ const styles = StyleSheet.create({
     color: '#007BFF',
     fontWeight: '600',
     marginLeft: 5,
-  }
+  },
 });
 
 export default RegisterScreen;

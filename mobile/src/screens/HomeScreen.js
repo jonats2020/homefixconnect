@@ -109,7 +109,16 @@ const HomeScreen = ({ navigation }) => {
         { 
           text: 'Logout', 
           onPress: async () => {
-            await logout();
+            const result = await logout();
+            if (result.success) {
+              // Navigate to Login screen
+              navigation.reset({
+                index: 0,
+                routes: [{ name: 'Login' }],
+              });
+            } else {
+              Alert.alert('Error', result.message || 'Failed to logout');
+            }
           },
           style: 'destructive'
         }

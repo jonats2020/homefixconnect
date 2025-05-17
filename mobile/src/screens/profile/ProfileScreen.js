@@ -128,7 +128,13 @@ const ProfileScreen = ({ navigation }) => {
           text: 'Logout', 
           onPress: async () => {
             const result = await logout();
-            if (!result.success) {
+            if (result.success) {
+              // Navigate back to Login screen
+              navigation.reset({
+                index: 0,
+                routes: [{ name: 'Login' }],
+              });
+            } else {
               Alert.alert('Error', result.message || 'Failed to logout');
             }
           },

@@ -1,6 +1,3 @@
-// API configuration
-export const API_URL = 'http://localhost:5000'; // This will need to be updated to the actual server URL
-
 // App constants
 export const JOB_CATEGORIES = [
   'Plumbing',
@@ -17,7 +14,7 @@ export const JOB_CATEGORIES = [
   'Appliance Repair',
   'Pest Control',
   'Security',
-  'Other'
+  'Other',
 ];
 
 // Job status constants
@@ -25,18 +22,18 @@ export const JOB_STATUS = {
   OPEN: 'open',
   IN_PROGRESS: 'in_progress',
   COMPLETED: 'completed',
-  CANCELLED: 'cancelled'
+  CANCELLED: 'cancelled',
 };
 
 // Bid status constants
 export const BID_STATUS = {
   PENDING: 'pending',
   ACCEPTED: 'accepted',
-  REJECTED: 'rejected'
+  REJECTED: 'rejected',
 };
 
 // User roles
 export const USER_ROLES = {
   CUSTOMER: 'customer',
-  CONTRACTOR: 'contractor'
+  CONTRACTOR: 'contractor',
 };

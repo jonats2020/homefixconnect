@@ -113,16 +113,19 @@ const login = async (req, res) => {
     const { email, password } = req.body;
 
     if (!email || !password) {
+      console.error('Email and password are required');
       return res.status(400).json({ error: 'Email and password are required' });
     }
 
     // Authenticate user with Supabase Auth
-    const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
+    const { data: authData, error: authError } =
+      await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
 
     if (authError) {
+      console.error('Invalid credentials');
       return res.status(401).json({ error: 'Invalid credentials' });
     }
 
@@ -134,6 +137,7 @@ const login = async (req, res) => {
       .single();
 
     if (userError || !userData) {
+      console.error('User profile not found');
       return res.status(404).json({ error: 'User profile not found' });
     }
 

@@ -18,7 +18,7 @@ const JobDetailScreen = ({ route, navigation }) => {
   const { jobId } = route.params;
   const { user } = useAuth();
   const { jobs, bids, chat } = useAPI();
-  
+
   const [job, setJob] = useState(null);
   const [jobBids, setJobBids] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -28,7 +28,7 @@ const JobDetailScreen = ({ route, navigation }) => {
   const [estimatedDays, setEstimatedDays] = useState('');
   const [isSubmittingBid, setIsSubmittingBid] = useState(false);
   const [userBid, setUserBid] = useState(null);
-  
+
   // Load job data
   useEffect(() => {
     loadJobData();
@@ -39,20 +39,20 @@ const JobDetailScreen = ({ route, navigation }) => {
     try {
       // Load job details
       const jobResult = await jobs.getJobById(jobId);
-      
+
       if (jobResult.success) {
         setJob(jobResult.data.job);
-        
+
         // Load bids for this job
         const bidsResult = await bids.getBidsForJob(jobId);
-        
+
         if (bidsResult.success) {
           setJobBids(bidsResult.data.bids);
-          
+
           // Check if current user has already placed a bid
           if (user.role === USER_ROLES.CONTRACTOR) {
             const userPlacedBid = bidsResult.data.bids.find(
-              bid => bid.contractor_id === user.id
+              (bid) => bid.contractor_id === user.id
             );
             setUserBid(userPlacedBid);
           }
@@ -83,11 +83,11 @@ const JobDetailScreen = ({ route, navigation }) => {
         jobId,
         amount: parseFloat(bidAmount),
         proposal: bidProposal,
-        estimatedDays: estimatedDays ? parseInt(estimatedDays) : undefined
+        estimatedDays: estimatedDays ? parseInt(estimatedDays) : undefined,
       };
-      
+
       const result = await bids.createBid(bidData);
-      
+
       if (result.success) {
         Alert.alert('Success', 'Your bid has been placed successfully');
         setBidModalVisible(false);
@@ -110,15 +110,18 @@ const JobDetailScreen = ({ route, navigation }) => {
       'Are you sure you want to accept this bid? This will assign the contractor to your job.',
       [
         { text: 'Cancel', style: 'cancel' },
-        { 
-          text: 'Accept', 
+        {
+          text: 'Accept',
           onPress: async () => {
             try {
               setIsLoading(true);
               const result = await jobs.assignContractor(jobId, bidId);
-              
+
               if (result.success) {
-                Alert.alert('Success', 'Contractor has been assigned to the job');
+                Alert.alert(
+                  'Success',
+                  'Contractor has been assigned to the job'
+                );
                 loadJobData(); // Reload job data
               } else {
                 Alert.alert('Error', result.message || 'Failed to accept bid');
@@ -129,23 +132,31 @@ const JobDetailScreen = ({ route, navigation }) => {
             } finally {
               setIsLoading(false);
             }
-          }
-        }
+          },
+        },
       ]
     );
   };
 
   // Start a conversation with user
-  const startConversation = async (userId, userName) => {
+  const startConversation = async (
+    currentUserId,
+    otherUserId,
+    userName,
+    jobId
+  ) => {
     try {
       setIsLoading(true);
-      const result = await chat.getOrCreateConversation(userId);
-      
+      const result = await chat.getOrCreateConversation(
+        currentUserId,
+        otherUserId
+      );
+
       if (result.success) {
-        navigation.navigate('Chat', { 
+        navigation.navigate('Chat', {
           conversationId: result.data.conversation.id,
           name: userName,
-          jobId // Pass jobId for context
+          jobId, // Pass jobId for context
         });
       } else {
         Alert.alert('Error', result.message || 'Failed to start conversation');
@@ -163,55 +174,55 @@ const JobDetailScreen = ({ route, navigation }) => {
     <Modal
       visible={isBidModalVisible}
       transparent
-      animationType="slide"
+      animationType='slide'
       onRequestClose={() => setBidModalVisible(false)}
     >
       <View style={styles.modalOverlay}>
         <View style={styles.modalContent}>
           <Text style={styles.modalTitle}>Place a Bid</Text>
-          
+
           <Text style={styles.modalLabel}>Bid Amount ($)</Text>
           <TextInput
             style={styles.modalInput}
             value={bidAmount}
             onChangeText={setBidAmount}
-            placeholder="Enter your bid amount"
-            keyboardType="numeric"
+            placeholder='Enter your bid amount'
+            keyboardType='numeric'
           />
-          
+
           <Text style={styles.modalLabel}>Estimated Days</Text>
           <TextInput
             style={styles.modalInput}
             value={estimatedDays}
             onChangeText={setEstimatedDays}
-            placeholder="Enter estimated days to complete"
-            keyboardType="numeric"
+            placeholder='Enter estimated days to complete'
+            keyboardType='numeric'
           />
-          
+
           <Text style={styles.modalLabel}>Proposal</Text>
           <TextInput
             style={[styles.modalInput, styles.proposalInput]}
             value={bidProposal}
             onChangeText={setBidProposal}
-            placeholder="Describe your proposal and approach"
+            placeholder='Describe your proposal and approach'
             multiline
           />
-          
+
           <View style={styles.modalButtons}>
-            <TouchableOpacity 
+            <TouchableOpacity
               style={[styles.modalButton, styles.cancelButton]}
               onPress={() => setBidModalVisible(false)}
             >
               <Text style={styles.cancelButtonText}>Cancel</Text>
             </TouchableOpacity>
-            
-            <TouchableOpacity 
+
+            <TouchableOpacity
               style={[styles.modalButton, styles.submitButton]}
               onPress={handlePlaceBid}
               disabled={isSubmittingBid}
             >
               {isSubmittingBid ? (
-                <ActivityIndicator size="small" color="#fff" />
+                <ActivityIndicator size='small' color='#fff' />
               ) : (
                 <Text style={styles.submitButtonText}>Submit Bid</Text>
               )}
@@ -228,9 +239,9 @@ const JobDetailScreen = ({ route, navigation }) => {
       [JOB_STATUS.OPEN]: styles.statusOpen,
       [JOB_STATUS.IN_PROGRESS]: styles.statusInProgress,
       [JOB_STATUS.COMPLETED]: styles.statusCompleted,
-      [JOB_STATUS.CANCELLED]: styles.statusCancelled
+      [JOB_STATUS.CANCELLED]: styles.statusCancelled,
     };
-    
+
     return (
       <Text style={[styles.statusBadge, statusStyles[job.status]]}>
         {job.status.toUpperCase()}
@@ -245,21 +256,27 @@ const JobDetailScreen = ({ route, navigation }) => {
       if (job.status === JOB_STATUS.OPEN) {
         return (
           <View style={styles.actionButtonsContainer}>
-            <TouchableOpacity 
+            <TouchableOpacity
               style={[styles.actionButton, styles.cancelButton]}
               onPress={() => {
                 // Implement cancel job logic
-                Alert.alert('Coming Soon', 'This feature is not yet implemented');
+                Alert.alert(
+                  'Coming Soon',
+                  'This feature is not yet implemented'
+                );
               }}
             >
               <Text style={styles.cancelButtonText}>Cancel Job</Text>
             </TouchableOpacity>
-            
-            <TouchableOpacity 
+
+            <TouchableOpacity
               style={[styles.actionButton, styles.primaryButton]}
               onPress={() => {
                 // Implement edit job logic
-                Alert.alert('Coming Soon', 'This feature is not yet implemented');
+                Alert.alert(
+                  'Coming Soon',
+                  'This feature is not yet implemented'
+                );
               }}
             >
               <Text style={styles.primaryButtonText}>Edit Job</Text>
@@ -268,7 +285,7 @@ const JobDetailScreen = ({ route, navigation }) => {
         );
       } else if (job.status === JOB_STATUS.IN_PROGRESS) {
         return (
-          <TouchableOpacity 
+          <TouchableOpacity
             style={[styles.fullWidthButton, styles.primaryButton]}
             onPress={() => {
               // Implement mark as complete logic
@@ -281,50 +298,59 @@ const JobDetailScreen = ({ route, navigation }) => {
       } else if (job.status === JOB_STATUS.COMPLETED) {
         // Check if user has already rated
         return (
-          <TouchableOpacity 
+          <TouchableOpacity
             style={[styles.fullWidthButton, styles.primaryButton]}
             onPress={() => {
               // Implement leave rating logic
-              Alert.alert('Coming Soon', 'Rating feature is not yet implemented');
+              Alert.alert(
+                'Coming Soon',
+                'Rating feature is not yet implemented'
+              );
             }}
           >
             <Text style={styles.primaryButtonText}>Leave Rating</Text>
           </TouchableOpacity>
         );
       }
-    } 
+    }
     // If user is a contractor
     else if (user.role === USER_ROLES.CONTRACTOR) {
       // If job is open and user hasn't placed a bid yet
       if (job.status === JOB_STATUS.OPEN && !userBid) {
         return (
-          <TouchableOpacity 
+          <TouchableOpacity
             style={[styles.fullWidthButton, styles.primaryButton]}
             onPress={() => setBidModalVisible(true)}
           >
             <Text style={styles.primaryButtonText}>Place Bid</Text>
           </TouchableOpacity>
         );
-      } 
+      }
       // If user has already placed a bid
       else if (job.status === JOB_STATUS.OPEN && userBid) {
         return (
           <View style={styles.actionButtonsContainer}>
-            <TouchableOpacity 
+            <TouchableOpacity
               style={[styles.actionButton, styles.secondaryButton]}
               onPress={() => {
                 // Implement update bid logic
-                Alert.alert('Coming Soon', 'Update bid feature is not yet implemented');
+                Alert.alert(
+                  'Coming Soon',
+                  'Update bid feature is not yet implemented'
+                );
               }}
             >
               <Text style={styles.secondaryButtonText}>Update Bid</Text>
             </TouchableOpacity>
-            
-            <TouchableOpacity 
+
+            <TouchableOpacity
               style={[styles.actionButton, styles.dangerButton]}
               onPress={() => {
                 // Implement withdraw bid logic
-                Alert.alert('Coming Soon', 'Withdraw bid feature is not yet implemented');
+                Alert.alert(
+                  'Coming Soon',
+                  'Withdraw bid feature is not yet implemented'
+                );
               }}
             >
               <Text style={styles.dangerButtonText}>Withdraw Bid</Text>
@@ -336,11 +362,14 @@ const JobDetailScreen = ({ route, navigation }) => {
       else if (job.contractor_id === user.id) {
         if (job.status === JOB_STATUS.IN_PROGRESS) {
           return (
-            <TouchableOpacity 
+            <TouchableOpacity
               style={[styles.fullWidthButton, styles.primaryButton]}
               onPress={() => {
                 // Request completion approval
-                Alert.alert('Coming Soon', 'This feature is not yet implemented');
+                Alert.alert(
+                  'Coming Soon',
+                  'This feature is not yet implemented'
+                );
               }}
             >
               <Text style={styles.primaryButtonText}>Request Completion</Text>
@@ -349,14 +378,14 @@ const JobDetailScreen = ({ route, navigation }) => {
         }
       }
     }
-    
+
     return null;
   };
 
   if (isLoading) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#007BFF" />
+        <ActivityIndicator size='large' color='#007BFF' />
         <Text style={styles.loadingText}>Loading job details...</Text>
       </View>
     );
@@ -366,7 +395,7 @@ const JobDetailScreen = ({ route, navigation }) => {
     return (
       <View style={styles.errorContainer}>
         <Text style={styles.errorText}>Job not found</Text>
-        <TouchableOpacity 
+        <TouchableOpacity
           style={styles.backButton}
           onPress={() => navigation.goBack()}
         >
@@ -384,58 +413,67 @@ const JobDetailScreen = ({ route, navigation }) => {
           <Text style={styles.jobTitle}>{job.title}</Text>
           {renderJobStatus()}
         </View>
-        
+
         <View style={styles.jobMetaContainer}>
           <View style={styles.jobMeta}>
             <Text style={styles.metaLabel}>Budget:</Text>
             <Text style={styles.metaValue}>${job.budget}</Text>
           </View>
-          
+
           <View style={styles.jobMeta}>
             <Text style={styles.metaLabel}>Category:</Text>
             <Text style={styles.metaValue}>{job.category}</Text>
           </View>
-          
+
           {job.location && (
             <View style={styles.jobMeta}>
               <Text style={styles.metaLabel}>Location:</Text>
               <Text style={styles.metaValue}>{job.location}</Text>
             </View>
           )}
-          
+
           <View style={styles.jobMeta}>
             <Text style={styles.metaLabel}>Posted:</Text>
-            <Text style={styles.metaValue}>{new Date(job.created_at).toLocaleDateString()}</Text>
+            <Text style={styles.metaValue}>
+              {new Date(job.created_at).toLocaleDateString()}
+            </Text>
           </View>
         </View>
       </View>
-      
+
       {/* Job Description Section */}
       <View style={styles.descriptionSection}>
         <Text style={styles.sectionTitle}>Description</Text>
         <Text style={styles.descriptionText}>{job.description}</Text>
       </View>
-      
+
       {/* Customer/Contractor Information Section */}
       <View style={styles.userSection}>
         <Text style={styles.sectionTitle}>
           {job.customer_id === user.id ? 'Your Job' : 'Posted by'}
         </Text>
-        
+
         <View style={styles.userCard}>
           <View style={styles.userInfo}>
             <Text style={styles.userName}>{job.customer.full_name}</Text>
             {job.customer_id !== user.id && (
-              <TouchableOpacity 
+              <TouchableOpacity
                 style={styles.contactButton}
-                onPress={() => startConversation(job.customer_id, job.customer.full_name)}
+                onPress={() =>
+                  startConversation(
+                    user.id,
+                    job.customer_id,
+                    user.fullName,
+                    job.id
+                  )
+                }
               >
                 <Text style={styles.contactButtonText}>Contact</Text>
               </TouchableOpacity>
             )}
           </View>
         </View>
-        
+
         {job.contractor && (
           <>
             <Text style={styles.sectionTitle}>Assigned Contractor</Text>
@@ -443,9 +481,16 @@ const JobDetailScreen = ({ route, navigation }) => {
               <View style={styles.userInfo}>
                 <Text style={styles.userName}>{job.contractor.full_name}</Text>
                 {job.contractor_id !== user.id && (
-                  <TouchableOpacity 
+                  <TouchableOpacity
                     style={styles.contactButton}
-                    onPress={() => startConversation(job.contractor_id, job.contractor.full_name)}
+                    onPress={() =>
+                      startConversation(
+                        user.id,
+                        job.contractor_id,
+                        user.fullName,
+                        job.id
+                      )
+                    }
                   >
                     <Text style={styles.contactButtonText}>Contact</Text>
                   </TouchableOpacity>
@@ -455,69 +500,85 @@ const JobDetailScreen = ({ route, navigation }) => {
           </>
         )}
       </View>
-      
+
       {/* Bids Section - Only visible for job owner or if user has placed a bid */}
       {(job.customer_id === user.id || userBid) && jobBids.length > 0 && (
         <View style={styles.bidsSection}>
           <Text style={styles.sectionTitle}>Bids ({jobBids.length})</Text>
-          
-          {jobBids.map(bid => (
+
+          {jobBids.map((bid) => (
             <View key={bid.id} style={styles.bidCard}>
               <View style={styles.bidHeader}>
-                <Text style={styles.bidderName}>{bid.contractor.full_name}</Text>
+                <Text style={styles.bidderName}>
+                  {bid.contractor.full_name}
+                </Text>
                 <Text style={styles.bidAmount}>${bid.amount}</Text>
               </View>
-              
+
               {bid.status !== BID_STATUS.PENDING && (
                 <View style={styles.bidStatusContainer}>
-                  <Text style={[
-                    styles.bidStatus,
-                    bid.status === BID_STATUS.ACCEPTED ? styles.acceptedBid : styles.rejectedBid
-                  ]}>
+                  <Text
+                    style={[
+                      styles.bidStatus,
+                      bid.status === BID_STATUS.ACCEPTED
+                        ? styles.acceptedBid
+                        : styles.rejectedBid,
+                    ]}
+                  >
                     {bid.status.toUpperCase()}
                   </Text>
                 </View>
               )}
-              
-              {(bid.proposal && (job.customer_id === user.id || bid.contractor_id === user.id)) && (
-                <Text style={styles.bidProposal}>{bid.proposal}</Text>
-              )}
-              
+
+              {bid.proposal &&
+                (job.customer_id === user.id ||
+                  bid.contractor_id === user.id) && (
+                  <Text style={styles.bidProposal}>{bid.proposal}</Text>
+                )}
+
               {bid.estimated_days && (
                 <Text style={styles.bidEstimate}>
-                  Estimated time: {bid.estimated_days} day{bid.estimated_days !== 1 ? 's' : ''}
+                  Estimated time: {bid.estimated_days} day
+                  {bid.estimated_days !== 1 ? 's' : ''}
                 </Text>
               )}
-              
+
               <View style={styles.bidActions}>
-                {job.customer_id === user.id && job.status === JOB_STATUS.OPEN && (
-                  <TouchableOpacity 
-                    style={styles.acceptBidButton}
-                    onPress={() => handleAcceptBid(bid.id)}
-                  >
-                    <Text style={styles.acceptBidButtonText}>Accept Bid</Text>
-                  </TouchableOpacity>
-                )}
-                
-                {job.customer_id === user.id && bid.contractor_id !== user.id && (
-                  <TouchableOpacity 
-                    style={styles.contactBidderButton}
-                    onPress={() => startConversation(bid.contractor_id, bid.contractor.full_name)}
-                  >
-                    <Text style={styles.contactBidderText}>Contact</Text>
-                  </TouchableOpacity>
-                )}
+                {job.customer_id === user.id &&
+                  job.status === JOB_STATUS.OPEN && (
+                    <TouchableOpacity
+                      style={styles.acceptBidButton}
+                      onPress={() => handleAcceptBid(bid.id)}
+                    >
+                      <Text style={styles.acceptBidButtonText}>Accept Bid</Text>
+                    </TouchableOpacity>
+                  )}
+
+                {job.customer_id === user.id &&
+                  bid.contractor_id !== user.id && (
+                    <TouchableOpacity
+                      style={styles.contactBidderButton}
+                      onPress={() =>
+                        startConversation(
+                          user.id,
+                          bid.contractor_id,
+                          user.fullName,
+                          job.id
+                        )
+                      }
+                    >
+                      <Text style={styles.contactBidderText}>Contact</Text>
+                    </TouchableOpacity>
+                  )}
               </View>
             </View>
           ))}
         </View>
       )}
-      
+
       {/* Action Buttons */}
-      <View style={styles.actionSection}>
-        {renderActionButtons()}
-      </View>
-      
+      <View style={styles.actionSection}>{renderActionButtons()}</View>
+
       {/* Bid Modal */}
       {renderBidModal()}
     </ScrollView>

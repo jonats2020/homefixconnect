@@ -8,28 +8,34 @@ const { isValidUUID } = require('../utils/helpers');
  */
 const getOrCreateConversation = async (req, res) => {
   try {
-    const { otherUserId } = req.body;
-    const currentUserId = req.user.userId;
-    
+    const { otherUserId, currentUserId } = req.body;
+
+    console.log({ otherUserId, currentUserId });
+
     if (!isValidUUID(otherUserId)) {
+      console.error('Invalid user ID format', otherUserId);
       return res.status(400).json({ error: 'Invalid user ID format' });
     }
-    
+
     if (currentUserId === otherUserId) {
-      return res.status(400).json({ error: 'Cannot create conversation with yourself' });
+      console.error('Cannot create conversation with yourself');
+      return res
+        .status(400)
+        .json({ error: 'Cannot create conversation with yourself' });
     }
-    
+
     // Check if other user exists
     const { data: otherUser, error: userError } = await supabase
       .from('users')
       .select('id, full_name')
       .eq('id', otherUserId)
       .single();
-    
+
     if (userError || !otherUser) {
+      console.error('User not found');
       return res.status(404).json({ error: 'User not found' });
     }
-    
+
     // Try to find an existing conversation
     const { data: existingConversation, error: convError } = await supabase
       .from('conversations')
@@ -37,35 +43,34 @@ const getOrCreateConversation = async (req, res) => {
       .or(`user1_id.eq.${currentUserId},user2_id.eq.${currentUserId}`)
       .or(`user1_id.eq.${otherUserId},user2_id.eq.${otherUserId}`)
       .single();
-    
+
     if (existingConversation) {
       return res.status(200).json({
         message: 'Conversation found',
-        conversation: existingConversation
+        conversation: existingConversation,
       });
     }
-    
+
     // Create a new conversation
     const { data: newConversation, error: createError } = await supabase
       .from('conversations')
       .insert({
         user1_id: currentUserId,
         user2_id: otherUserId,
-        created_at: new Date().toISOString()
+        created_at: new Date().toISOString(),
       })
       .select()
       .single();
-    
+
     if (createError) {
       console.error('Create conversation error:', createError);
       return res.status(400).json({ error: 'Failed to create conversation' });
     }
-    
+
     return res.status(201).json({
       message: 'Conversation created successfully',
-      conversation: newConversation
+      conversation: newConversation,
     });
-
   } catch (error) {
     console.error('Get or create conversation error:', error);
     return res.status(500).json({ error: 'Internal server error' });
