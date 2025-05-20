@@ -4,11 +4,6 @@ A sophisticated mobile marketplace platform built on Replit that connects homeow
 
 ![Group 1](https://github.com/user-attachments/assets/5e1c2235-d1b8-4920-9c61-39f87e2ca458)
 
-
-## ✨ Built to Showcase Replit's Capabilities
-
-This project demonstrates how Replit's powerful development environment enables the creation of full-stack applications with complex architectures:
-
 - **Multi-language Support**: Seamlessly combines Node.js for the backend API with React Native for the mobile frontend
 - **Integrated Development Experience**: All code, from backend to frontend, lives in a single Replit environment
 - **Database Integration**: Direct connection to Supabase (PostgreSQL) without leaving the Replit environment
